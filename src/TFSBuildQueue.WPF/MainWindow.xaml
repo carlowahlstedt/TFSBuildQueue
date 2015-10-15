@@ -1,0 +1,95 @@
+﻿<Controls:MetroWindow
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Custom="http://infragistics.com/Editors" x:Class="TFSBuildQueue.WPF.MainWindow"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:toastinet="clr-namespace:ToastinetWPF;assembly=ToastinetWPF"
+        Title="TFS Build Queue" Height="350" Width="976" Background="LightGray" MinHeight="350" MinWidth="600"
+        x:Name="mainWindow" Loaded="Window_Loaded" Closed="mainWindow_Closed" Icon="Resources/stack.ico">
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button Name="btnRefresh" Click="btnRefresh_Click" Width="85">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="Resources/refresh.png" Height="20" Width="20" />
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Refresh" />
+                </StackPanel>
+            </Button>
+            <Button Name="btnExport" Width="85" Click="btnExport_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Image Name="imgDownload" Source="Resources/download.png" Height="20" Width="20" />
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Export" />
+                </StackPanel>
+            </Button>
+            <Button Name="btnSettings" Content="Settings" Click="btnSettings_Click" />
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
+    <Controls:MetroWindow.Flyouts>
+        <Controls:FlyoutsControl>
+            <Controls:Flyout Name="flyoutSettings" Header="Settings" Position="Right" Width="250" Theme="Accent">
+                <Grid>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="TFS URL:" Foreground="White" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                                <TextBox Name="txtTfsUrl" HorizontalAlignment="Left" VerticalAlignment="Top" Height="23" TextWrapping="NoWrap" Margin="15,-3,0,0" 
+                                     Text="" Width="190" />
+                            <Button Name="btnTfsUrl" Content="Set" Width="30" Margin="5,-3,0,0" Click="btnTfsUrl_Click" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Refresh Interval (sec)" Foreground="White" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" />
+                            <TextBox Name="txtRefreshInterval" HorizontalAlignment="Left" VerticalAlignment="Top" Height="23" TextWrapping="Wrap" TextAlignment="Right" Margin="10,10,0,0" 
+                                     Text="30" Width="50" MaxLength="3"
+                                     PreviewTextInput="txtRefreshInterval_PreviewTextInput" TextChanged="txtRefreshInterval_TextChanged"
+                                     PreviewKeyDown="txtRefreshInterval_PreviewKeyDown" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="New Build Notification" Foreground="White" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" />
+                            <CheckBox Name="chkNewBuildNotifications" HorizontalAlignment="Left" Margin="10,10,0,0"
+                                      Checked="chkNewBuildNotifications_Checked" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Build Complete Notification" Foreground="White" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" />
+                            <CheckBox Name="chkBuildCompleteNotifications" HorizontalAlignment="Left" Margin="10,10,0,0" 
+                                      Checked="chkBuildCompleteNotifications_Checked" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Notification Length (seconds)" Foreground="White" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" />
+                            <TextBox Name="txtNotificationLength" HorizontalAlignment="Left" VerticalAlignment="Top" Height="23" TextWrapping="Wrap" TextAlignment="Right" Margin="10,10,0,0" 
+                                     Text="10" Width="50" MaxLength="3"
+                                     PreviewTextInput="txtNotificationLength_PreviewTextInput" TextChanged="txtNotificationLength_TextChanged"
+                                     PreviewKeyDown="txtNotificationLength_PreviewKeyDown" />
+                        </StackPanel>
+                        <Label Name="txtName" Foreground="White" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Top" />
+                    </StackPanel>
+                    <Label Content="Carlo Wahlstedt" Foreground="White" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" />
+                </Grid>
+            </Controls:Flyout>
+        </Controls:FlyoutsControl>
+    </Controls:MetroWindow.Flyouts>
+    <Grid>
+        <Grid Name="progressRing" Panel.ZIndex="1" Background="{StaticResource ResourceKey=ProgressRingBg}" >
+            <Controls:ProgressRing IsActive="True" />
+        </Grid>
+        <DataGrid x:Name="dataGrid" Margin="10" AutoGenerateColumns="true" SelectionMode="Extended" SelectionUnit="FullRow" 
+                  AlternatingRowBackground="White" RowBackground="{StaticResource ResourceKey=PrettyBlue}">
+        </DataGrid>
+        <toastinet:Toastinet x:Name="ToastTfs" Duration="32000" Height="65" ShowLogo="False" FontSize="25" AnimationType="RightToLeft"
+                             Background="{StaticResource ResourceKey=PrettyOrange}"
+                             Foreground="Black" TextWrapping="WrapWithOverflow" Canvas.ZIndex="1" VerticalAlignment="Center" />
+        <Popup Name="Notification" AllowsTransparency="True" Panel.ZIndex="2" Width="250" Height="125" Placement="Absolute" MouseUp="Notification_MouseUp" Opened="Notification_Opened">
+            <Border BorderBrush="{StaticResource ResourceKey=ProgressRingBg}" BorderThickness="1">
+                <Grid Background="{StaticResource ResourceKey=PrettyBlue}">
+                    <Label Name="NotificationTitleText" Content="1 New Build(s)" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,-3,0,0" FontSize="12" 
+                           FontWeight="Bold" Width="250" 
+                           BorderBrush="{StaticResource ResourceKey=ProgressRingBg}" Background="{StaticResource ResourceKey=ProgressRingBg}" />
+                    <Button Name="btnCloseNotification" Content="X" Width="18" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,-4,1,0" 
+                            FontSize="12" Background="Transparent" BorderThickness="0" 
+                            Click="btnCloseNotification_Click" />
+                    <Label Name="NotificationText" Content="1 Build(s)" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Grid>
+            </Border>
+        </Popup>
+        
+    </Grid>
+</Controls:MetroWindow>
