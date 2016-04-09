@@ -1,6 +1,7 @@
 ﻿using Microsoft.TeamFoundation.Build.Client;
 using Microsoft.TeamFoundation.Client;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,7 +37,8 @@ namespace TFSBuildQueue.Domain
         {
             BuildQueryResult = _BuildServer.QueryQueuedBuilds(_QueuedBuildSpec);
             return from builds in BuildQueryResult.QueuedBuilds
-                   orderby builds.BuildController ascending, builds.QueueTime ascending
+                   orderby builds.QueueTime ascending
+                   //                   orderby builds.BuildController ascending, builds.QueueTime ascending
                    select builds;
         }
 
