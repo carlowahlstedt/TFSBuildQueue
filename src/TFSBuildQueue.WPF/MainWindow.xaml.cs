@@ -130,6 +130,7 @@ namespace TFSBuildQueue.WPF
                 }
                 catch (Exception ex)
                 {
+                    MessageBox.Show(ex.ToString(), "Error");
                 }
             }
         }
