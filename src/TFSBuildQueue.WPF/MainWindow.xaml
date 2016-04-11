@@ -4,6 +4,7 @@
         xmlns:Custom="http://infragistics.com/Editors" x:Class="TFSBuildQueue.WPF.MainWindow"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:toastinet="clr-namespace:ToastinetWPF;assembly=ToastinetWPF"
+        StateChanged="mainWindow_StateChanged"
         Title="TFS Build Queue" Height="350" Width="976" Background="LightGray" MinHeight="350" MinWidth="600"
         x:Name="mainWindow" Loaded="Window_Loaded" Closed="mainWindow_Closed" Icon="Resources/stack.ico">
     <Controls:MetroWindow.RightWindowCommands>

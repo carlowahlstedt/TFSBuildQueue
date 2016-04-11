@@ -16,6 +16,7 @@ using Humanizer;
 using System.Windows.Media;
 using System.Media;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace TFSBuildQueue.WPF
 {
@@ -31,14 +32,37 @@ namespace TFSBuildQueue.WPF
         public IEnumerable<TfsBuild> BuildList;
         readonly string _WindowTitle = "TFS Build Queue";
         int _PreviousBuildCount;
+        System.Windows.Forms.NotifyIcon _notifyIcon = new System.Windows.Forms.NotifyIcon()
+        {
+            Icon = new Icon(Application.GetResourceStream(new Uri("pack://application:,,,/Resources/stack.ico")).Stream),// (Icon)Application.Current.FindResource("stackIcon"),
+            Visible = false,
+            BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info,
+            BalloonTipTitle = "TFS Build Queue",
+            BalloonTipText = "TFS Build Queue"
+        };
+
 
         public MainWindow()
         {
             InitializeComponent();
+
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            _notifyIcon.Click +=
+                    delegate (object s, EventArgs a)
+                    {
+                        Show();
+                        WindowState = WindowState.Normal;
+                    };
+            _notifyIcon.BalloonTipClicked +=
+                    delegate (object s, EventArgs a)
+                    {
+                        Show();
+                        WindowState = WindowState.Normal;
+                    };
+
             progressRing.Visibility = Visibility.Hidden;
             Title = _WindowTitle;
             txtTfsUrl.Text = Properties.Settings.Default.TfsUrl;
@@ -139,19 +163,48 @@ namespace TFSBuildQueue.WPF
         {
             Dispatcher.Invoke(() =>
             {
+                var buildWords = "Builds".ToQuantity(BuildList.Count(), ShowQuantityAs.Words).Titleize();
+                var previousTip = _notifyIcon.BalloonTipTitle;
+                buildWords += " in Queue";
+                _notifyIcon.BalloonTipTitle = buildWords;
+                if (BuildList.Count() == 0)
+                {
+                    _notifyIcon.BalloonTipText = "----------";
+                }
+                else
+                {
+                    _notifyIcon.BalloonTipText = string.Empty;
+                    for (int i = 0; i < BuildList.Count(); i++)
+                    {
+                        if (i == 6) break;
+
+                        _notifyIcon.BalloonTipText += BuildList.ToList()[0].BuildDefinitionName + Environment.NewLine;
+                    }
+                }
+
                 //Notification.IsOpen = true;
                 if (Properties.Settings.Default.NewBuildNotifications || Properties.Settings.Default.BuildCompleteNotifications)
                 {
-                    if (BuildList.Count() > 0 && _PreviousBuildCount != BuildList.Count())
+                    if (WindowState == WindowState.Minimized)
                     {
-                        SetupNotificationLocation();
-                        NotificationTitleText.Content = string.Format("{0} New Build(s)", BuildList.Count());
-                        NotificationText.Content = BuildList.GetBuildsList();
-                        Notification.IsOpen = true;
+                        if (previousTip != _notifyIcon.BalloonTipTitle)
+                        {
+                            _notifyIcon.ShowBalloonTip(500);
+                        }
+                    }
+                    else
+                    {
+                        if (BuildList.Count() > 0 && _PreviousBuildCount != BuildList.Count())
+                        {
+                            SetupNotificationLocation();
+                            NotificationTitleText.Content = buildWords;
+                            NotificationText.Content = BuildList.GetBuildsList();
+                            Notification.IsOpen = true;
+                        }
                     }
                 }
                 _PreviousBuildCount = BuildList.Count();
-                Title = string.Format("{0} ({1})", _WindowTitle, BuildList.Count());
+                Title = $@"{_WindowTitle} ({BuildList.Count()})";
                 dataGrid.ItemsSource = BuildList;
                 mainWindow.SizeToContent = BuildList.Count() != 0 ? SizeToContent.Width : SizeToContent.Manual;
                 btnExport.IsEnabled = (BuildList.Count() != 0);
@@ -370,5 +423,23 @@ namespace TFSBuildQueue.WPF
         }
 
         #endregion
+
+        private void mainWindow_StateChanged(object sender, EventArgs e)
+        {
+            switch (WindowState)
+            {
+                case WindowState.Minimized:
+                    _notifyIcon.Visible = true;
+                    _notifyIcon.ShowBalloonTip(500);
+                    Hide();
+                    break;
+                case WindowState.Normal:
+                case WindowState.Maximized:
+                    _notifyIcon.Visible = false;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
