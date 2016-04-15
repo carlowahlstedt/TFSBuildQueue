@@ -148,7 +148,7 @@ namespace TFSBuildQueue.WPF
                                    Requestor = build.RequestedForDisplayName
                                };
 
-                    BuildList = list.ToList();
+                    BuildList = (list == null) ? new List<TfsBuild>() : list.ToList();
 
                     UpdateUI();
                 }
@@ -178,7 +178,7 @@ namespace TFSBuildQueue.WPF
                     {
                         if (i == 6) break;
 
-                        _notifyIcon.BalloonTipText += BuildList.ToList()[0].BuildDefinitionName + Environment.NewLine;
+                        _notifyIcon.BalloonTipText += BuildList.ToList()[i].BuildDefinitionName + Environment.NewLine;
                     }
                 }
 
